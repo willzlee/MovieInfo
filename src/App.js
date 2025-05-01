@@ -5,14 +5,20 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import Dashboard from './components/Dashboard';
 
+// Get the host from the current window location
+const getHost = () => {
+  // Use window.location.host in browser, or fallback to 0.0.0.0:5000 in development
+  return typeof window !== 'undefined' ? window.location.host : '0.0.0.0:5000';
+};
+
 // Create an HTTP link for queries and mutations
 const httpLink = new HttpLink({
-  uri: 'http://localhost:5000/graphql'
+  uri: `https://${getHost()}/graphql`
 });
 
 // Create a WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(createClient({
-  url: 'ws://localhost:5000/graphql',
+  url: `wss://${getHost()}/graphql`,
   options: {
     reconnect: true,
   }
