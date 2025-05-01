@@ -13,12 +13,12 @@ const getHost = () => {
 
 // Create an HTTP link for queries and mutations
 const httpLink = new HttpLink({
-  uri: `https://${getHost()}/graphql`
+  uri: `http://${getHost()}/graphql`
 });
 
 // Create a WebSocket link for subscriptions
 const wsLink = new GraphQLWsLink(createClient({
-  url: `wss://${getHost()}/graphql`,
+  url: `ws://${getHost()}/graphql`,
   options: {
     reconnect: true,
   }
