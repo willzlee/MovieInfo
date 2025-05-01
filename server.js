@@ -3,6 +3,7 @@ const { ApolloServer } = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const { createServer } = require('http');
+const { WebSocketServer } = require('ws');
 const cors = require('cors');
 const path = require('path');
 const { PubSub } = require('graphql-subscriptions');
@@ -98,6 +99,63 @@ async function startServer() {
   const app = express();
   const httpServer = createServer(app);
 
+  // Create a WebSocket server for handling subscription connections
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql',
+  });
+
+  // Simple WebSocket implementation
+  wsServer.on('connection', (socket) => {
+    console.log('WebSocket client connected');
+    let subscriptionId = null;
+    
+    socket.on('message', (message) => {
+      try {
+        const data = JSON.parse(message);
+        console.log('Received message:', data.type);
+        
+        // Handle subscription init
+        if (data.type === 'connection_init') {
+          socket.send(JSON.stringify({ type: 'connection_ack' }));
+        }
+        
+        // Handle subscription requests
+        if (data.type === 'subscribe' && data.payload && data.payload.query) {
+          // Check if it's the dataPointAdded subscription
+          if (data.payload.query.includes('dataPointAdded')) {
+            subscriptionId = data.id;
+            console.log(`Client subscribed to dataPointAdded with id: ${subscriptionId}`);
+            
+            // Set up PubSub listener
+            const listener = (dataPoint) => {
+              // Send the data to the client
+              socket.send(JSON.stringify({
+                type: 'next',
+                id: subscriptionId,
+                payload: { data: dataPoint }
+              }));
+            };
+            
+            // Add listener for data point events
+            pubsub.subscribe(DATA_POINT_ADDED, listener);
+            
+            // Clean up when socket closes
+            socket.on('close', () => {
+              pubsub.unsubscribe(DATA_POINT_ADDED, listener);
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
+    });
+    
+    socket.on('close', () => {
+      console.log('WebSocket client disconnected');
+    });
+  });
+
   // Create Apollo Server
   const server = new ApolloServer({
     schema
@@ -128,6 +186,7 @@ async function startServer() {
   
   console.log(`Server ready at http://0.0.0.0:${PORT}`);
   console.log(`GraphQL endpoint: http://0.0.0.0:${PORT}/graphql`);
+  console.log(`WebSocket endpoint for subscriptions: ws://0.0.0.0:${PORT}/graphql`);
   
   // Generate random data every 3 seconds
   setInterval(generateRandomDataPoint, 3000);
