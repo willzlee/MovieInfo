@@ -1,7 +1,5 @@
-const { gql } = require('apollo-server-express');
-
 // GraphQL schema definition
-const typeDefs = gql`
+const typeDefs = `
   type DataPoint {
     id: ID!
     value: Float!
