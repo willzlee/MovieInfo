@@ -172,6 +172,65 @@ async function startServer() {
     expressMiddleware(server)
   );
   
+  // REST API endpoint to fetch all data points
+  app.get('/api/data', cors(), (req, res) => {
+    console.log('REST API called: GET /api/data', req.query);
+    // Handle optional query parameters
+    const { limit, category, after } = req.query;
+    
+    // Create a copy of the data for filtering
+    let filteredData = [...dataPoints];
+    
+    // Filter by category if specified
+    if (category) {
+      filteredData = filteredData.filter(point => point.category === category);
+    }
+    
+    // Filter by timestamp if 'after' is specified
+    if (after) {
+      const afterTimestamp = new Date(after).getTime();
+      if (!isNaN(afterTimestamp)) {
+        filteredData = filteredData.filter(point => 
+          new Date(point.timestamp).getTime() > afterTimestamp
+        );
+      }
+    }
+    
+    // Sort by timestamp (newest first)
+    filteredData.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    // Apply limit if specified
+    if (limit && !isNaN(parseInt(limit))) {
+      filteredData = filteredData.slice(0, parseInt(limit));
+    }
+    
+    // Return the data as JSON
+    res.json({
+      success: true,
+      count: filteredData.length,
+      data: filteredData
+    });
+  });
+  
+  // REST API endpoint to get data by ID
+  app.get('/api/data/:id', cors(), (req, res) => {
+    console.log('REST API called: GET /api/data/:id', req.params);
+    const { id } = req.params;
+    const dataPoint = dataPoints.find(point => point.id === id);
+    
+    if (!dataPoint) {
+      return res.status(404).json({
+        success: false,
+        message: `Data point with ID ${id} not found`
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: dataPoint
+    });
+  });
+  
   // Serve static files
   app.use(express.static(path.join(__dirname, 'build')));
   
@@ -187,6 +246,9 @@ async function startServer() {
   console.log(`Server ready at http://0.0.0.0:${PORT}`);
   console.log(`GraphQL endpoint: http://0.0.0.0:${PORT}/graphql`);
   console.log(`WebSocket endpoint for subscriptions: ws://0.0.0.0:${PORT}/graphql`);
+  console.log(`REST API endpoints: 
+  - GET http://0.0.0.0:${PORT}/api/data
+  - GET http://0.0.0.0:${PORT}/api/data/:id`);
   
   // Generate random data every 3 seconds
   setInterval(generateRandomDataPoint, 3000);
