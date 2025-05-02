@@ -212,6 +212,39 @@ async function startServer() {
     });
   });
   
+  // REST API endpoint to add a new data point
+  app.post('/api/data', cors(), express.json(), (req, res) => {
+    console.log('REST API called: POST /api/data', req.body);
+    const { value, label, category } = req.body;
+    
+    // Validate the required fields
+    if (typeof value !== 'number' || !label || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields. Please provide value (number), label (string), and category (string).'
+      });
+    }
+    
+    // Use the existing mutation handler to add the data point
+    try {
+      const newDataPoint = resolvers.Mutation.addDataPoint(
+        null,
+        { value, label, category }
+      );
+      
+      res.status(201).json({
+        success: true,
+        message: 'Data point added successfully',
+        data: newDataPoint
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: `Error adding data point: ${error.message}`
+      });
+    }
+  });
+  
   // REST API endpoint to get data by ID
   app.get('/api/data/:id', cors(), (req, res) => {
     console.log('REST API called: GET /api/data/:id', req.params);
@@ -248,7 +281,8 @@ async function startServer() {
   console.log(`WebSocket endpoint for subscriptions: ws://0.0.0.0:${PORT}/graphql`);
   console.log(`REST API endpoints: 
   - GET http://0.0.0.0:${PORT}/api/data
-  - GET http://0.0.0.0:${PORT}/api/data/:id`);
+  - GET http://0.0.0.0:${PORT}/api/data/:id
+  - POST http://0.0.0.0:${PORT}/api/data`);
   
   // Generate random data every 3 seconds
   setInterval(generateRandomDataPoint, 3000);
