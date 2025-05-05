@@ -186,14 +186,25 @@ function setupEventListeners() {
 // Auth functions
 async function checkAuthStatus() {
   try {
-    const response = await fetch('/api/portfolio');
+    // First, try a safer endpoint that doesn't trigger 401 errors in the console
+    const stocksResponse = await fetch('/api/stocks');
+    
+    if (!stocksResponse.ok) {
+      throw new Error('API server not responding');
+    }
+    
+    // Then check authentication with credentials
+    const response = await fetch('/api/portfolio', {
+      credentials: 'include'
+    });
     
     if (response.ok) {
       // User is authenticated
       const data = await response.json();
       handleSuccessfulAuth(data);
     } else {
-      // User is not authenticated or session expired
+      // User is not authenticated or session expired - this is normal for new visitors
+      console.log('User not authenticated yet, showing auth forms');
       showAuthForms();
     }
   } catch (error) {
@@ -253,6 +264,7 @@ async function handleLogin(event) {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     });
     
@@ -297,6 +309,7 @@ async function handleRegister(event) {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ username, password }),
     });
     
@@ -322,6 +335,7 @@ async function handleLogout() {
   try {
     await fetch('/api/auth/logout', {
       method: 'POST',
+      credentials: 'include'
     });
     
     // Clear state
@@ -364,7 +378,9 @@ function showView(view, link) {
 // Portfolio
 async function loadPortfolio() {
   try {
-    const response = await fetch('/api/portfolio');
+    const response = await fetch('/api/portfolio', {
+      credentials: 'include'
+    });
     
     if (response.ok) {
       const data = await response.json();
@@ -737,6 +753,7 @@ async function handleTrade(event) {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({
         symbol,
         action,
@@ -850,7 +867,9 @@ async function loadTransactions() {
       </tr>
     `;
     
-    const response = await fetch('/api/transactions');
+    const response = await fetch('/api/transactions', {
+      credentials: 'include'
+    });
     
     if (response.ok) {
       const data = await response.json();
@@ -927,7 +946,9 @@ function renderTransactions() {
 
 async function loadStatementSummary() {
   try {
-    const response = await fetch('/api/statements');
+    const response = await fetch('/api/statements', {
+      credentials: 'include'
+    });
     
     if (response.ok) {
       const data = await response.json();
@@ -944,7 +965,9 @@ async function loadStatementSummary() {
 
 async function generateStatement() {
   try {
-    const response = await fetch('/api/statements');
+    const response = await fetch('/api/statements', {
+      credentials: 'include'
+    });
     
     if (response.ok) {
       const data = await response.json();

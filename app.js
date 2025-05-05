@@ -26,7 +26,11 @@ app.use(session({
   secret: 'stock-trading-app-secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { 
+    secure: false, // Set to true if using HTTPS
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
 // In-memory data store (would be replaced with a database in production)
