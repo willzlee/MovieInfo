@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
-const session = require('express-session');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
@@ -10,41 +10,18 @@ const PORT = process.env.PORT || 5000;
 // In-memory storage for comments
 const movieComments = new Map();
 
-// Configure session middleware
-app.use(session({
-  secret: 'movie-app-secret',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 3600000 } // 1 hour
-}));
-
-// Set up EJS as the view engine
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
 // Middleware
+app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.get('/', (req, res) => {
-  // Check if there are previous search results in session
-  const lastSearch = req.session.lastSearch || null;
-  
-  res.render('index', { 
-    title: 'Movie Information App',
-    movies: lastSearch ? lastSearch.results : null,
-    searchQuery: lastSearch ? lastSearch.query : '',
-    error: null
-  });
-});
-
-app.get('/search', async (req, res) => {
-  const searchQuery = req.query.search;
+// API Routes for React frontend
+app.get('/api/search', async (req, res) => {
+  const searchQuery = req.query.query;
   
   if (!searchQuery) {
-    return res.redirect('/');
+    return res.status(400).json({ error: 'Search query is required' });
   }
 
   try {
@@ -52,46 +29,24 @@ app.get('/search', async (req, res) => {
     const response = await axios.get(`https://www.omdbapi.com/?s=${encodeURIComponent(searchQuery)}&apikey=${apiKey}`);
     
     if (response.data.Response === 'False') {
-      // Clear last search since this one failed
-      req.session.lastSearch = null;
-      
-      return res.render('index', { 
-        title: 'Movie Information App',
-        movies: null,
-        searchQuery: searchQuery,
+      return res.json({ 
         error: response.data.Error || 'No results found'
       });
     }
 
-    // Store search results in session
-    req.session.lastSearch = {
-      query: searchQuery,
-      results: response.data.Search
-    };
-
-    res.render('index', { 
-      title: 'Movie Information App',
-      movies: response.data.Search,
-      searchQuery: searchQuery,
-      error: null
+    res.json({ 
+      movies: response.data.Search
     });
 
   } catch (error) {
     console.error('Error fetching data from OMDB API:', error);
-    
-    // Clear last search on error
-    req.session.lastSearch = null;
-    
-    res.render('index', { 
-      title: 'Movie Information App',
-      movies: null,
-      searchQuery: searchQuery,
+    res.status(500).json({ 
       error: 'Error connecting to the movie database. Please try again later.'
     });
   }
 });
 
-app.get('/movie/:id', async (req, res) => {
+app.get('/api/movie/:id', async (req, res) => {
   const movieId = req.params.id;
 
   try {
@@ -99,10 +54,7 @@ app.get('/movie/:id', async (req, res) => {
     const response = await axios.get(`https://www.omdbapi.com/?i=${movieId}&plot=full&apikey=${apiKey}`);
     
     if (response.data.Response === 'False') {
-      return res.render('movie', { 
-        title: 'Movie Not Found',
-        movie: null,
-        comments: [],
+      return res.json({ 
         error: response.data.Error || 'Movie not found'
       });
     }
@@ -110,19 +62,14 @@ app.get('/movie/:id', async (req, res) => {
     // Get comments for this movie or create empty array if none exist
     const comments = movieComments.get(movieId) || [];
 
-    res.render('movie', { 
-      title: `${response.data.Title} (${response.data.Year})`,
+    res.json({ 
       movie: response.data,
-      comments: comments,
-      error: null
+      comments: comments
     });
 
   } catch (error) {
     console.error('Error fetching movie data from OMDB API:', error);
-    res.render('movie', { 
-      title: 'Movie Details',
-      movie: null,
-      comments: [],
+    res.status(500).json({ 
       error: 'Error connecting to the movie database. Please try again later.'
     });
   }
@@ -197,6 +144,15 @@ app.delete('/api/comments/:movieId/:commentId', (req, res) => {
     success: true, 
     message: 'Comment deleted successfully' 
   });
+});
+
+// Serve React app for all other routes
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/dist/index.html'));
+});
+
+app.get('/movie/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/dist/index.html'));
 });
 
 // Start the server
