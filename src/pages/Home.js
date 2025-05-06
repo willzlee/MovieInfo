@@ -14,7 +14,8 @@ export const Home = ({ onMovieSelect, lastSearch, onSearchResults }) => {
     setError(null);
     
     try {
-      const response = await fetch(`/api/search?query=${encodeURIComponent(searchQuery)}`);
+      // The API endpoint is /api/search for our Express backend
+      const response = await fetch(`http://localhost:5000/api/search?query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       
       if (data.error) {
