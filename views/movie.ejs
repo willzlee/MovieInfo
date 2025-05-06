@@ -110,6 +110,47 @@
                     <p>IMDb ID: <%= movie.imdbID %></p>
                     <a href="https://www.imdb.com/title/<%= movie.imdbID %>" target="_blank" class="imdb-link">View on IMDb</a>
                 </div>
+
+                <!-- Comments Section -->
+                <section class="comments-section">
+                    <h2>Comments</h2>
+                    
+                    <!-- Comment Form -->
+                    <div class="comment-form">
+                        <h3>Leave a Comment</h3>
+                        <form id="commentForm">
+                            <div class="form-group">
+                                <label for="name">Your Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="comment">Your Comment</label>
+                                <textarea id="comment" name="comment" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">Post Comment</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Comments List -->
+                    <div class="comments-list" id="commentsList">
+                        <% if (comments && comments.length > 0) { %>
+                            <% comments.forEach(comment => { %>
+                                <div class="comment" data-comment-id="<%= comment.id %>">
+                                    <div class="comment-header">
+                                        <h4><%= comment.name %></h4>
+                                        <span class="comment-date"><%= new Date(comment.timestamp).toLocaleString() %></span>
+                                        <button class="delete-comment" data-comment-id="<%= comment.id %>">Delete</button>
+                                    </div>
+                                    <p class="comment-text"><%= comment.comment %></p>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="no-comments-message">
+                                <p>No comments yet. Be the first to share your thoughts!</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </section>
             </section>
         <% } %>
     </div>
@@ -117,5 +158,8 @@
     <footer>
         <p>Data provided by <a href="https://www.omdbapi.com/" target="_blank">OMDb API</a></p>
     </footer>
+    
+    <!-- Load the comments JavaScript only on movie detail pages -->
+    <script src="/js/comments.js"></script>
 </body>
 </html>
