@@ -35,7 +35,7 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node app.js"
-waitForPort = 5000
+waitForPort = 5009
 
 [[workflows.workflow]]
 name = "build"
@@ -61,3 +61,7 @@ externalPort = 80
 [[ports]]
 localPort = 5001
 externalPort = 3000
+
+[[ports]]
+localPort = 5009
+externalPort = 3001
