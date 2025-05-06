@@ -11,7 +11,7 @@ export const MovieDetails = ({ movieId, onBackClick }) => {
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await fetch(`/api/movie/${movieId}`);
+        const response = await fetch(`http://localhost:5000/api/movie/${movieId}`);
         const data = await response.json();
         
         if (data.error) {
