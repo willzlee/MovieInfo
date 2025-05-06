@@ -5,17 +5,19 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5009;
+const PORT = process.env.PORT || 5000;
 
 // In-memory storage for comments
 const movieComments = new Map();
 
 // Middleware
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/dist', express.static(path.join(__dirname, 'public/dist')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Static file serving - order matters for proper resolution
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/dist', express.static(path.join(__dirname, 'public/dist')));
 
 // API Routes for React frontend
 app.get('/api/search', async (req, res) => {

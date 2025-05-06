@@ -35,7 +35,7 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node app.js"
-waitForPort = 5009
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "build"
