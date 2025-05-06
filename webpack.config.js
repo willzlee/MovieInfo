@@ -6,7 +6,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'public/dist'),
     filename: 'bundle.js',
-    publicPath: '/'
+    publicPath: '/dist/'
   },
   module: {
     rules: [
@@ -51,19 +51,22 @@ module.exports = {
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
+      publicPath: '/dist/'
     },
     compress: true,
     port: 5001, // Use a different port than the backend
+    host: '0.0.0.0', // Allow external connections
     hot: true,
     historyApiFallback: true,
-    open: true,
+    open: false, // Disable auto-opening browser in Replit
     devMiddleware: {
-      publicPath: '/',
+      publicPath: '/dist/'
     },
     proxy: [
       {
         context: ['/api'],
-        target: 'http://localhost:5009'
+        target: 'http://localhost:5009',
+        changeOrigin: true
       }
     ]
   }
