@@ -13,6 +13,7 @@ const movieComments = new Map();
 // Middleware
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/dist', express.static(path.join(__dirname, 'public/dist')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

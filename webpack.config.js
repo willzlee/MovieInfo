@@ -27,7 +27,18 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx'],
+    fallback: {
+      fs: false,
+      path: false,
+      os: false,
+      crypto: false,
+      constants: false,
+      stream: false,
+      url: false,
+      util: false,
+      'fs/promises': false
+    }
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -40,13 +51,23 @@ module.exports = {
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
+      publicPath: '/dist/'
     },
+    compress: true,
     port: 5001, // Use a different port than the backend
+    host: '0.0.0.0', // Allow external connections
     hot: true,
     historyApiFallback: true,
-    open: true,
+    open: false, // Disable auto-opening browser in Replit
     devMiddleware: {
-      publicPath: '/dist/',
+      publicPath: '/dist/'
     },
+    proxy: [
+      {
+        context: ['/api'],
+        target: 'http://localhost:5009',
+        changeOrigin: true
+      }
+    ]
   }
 };

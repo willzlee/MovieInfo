@@ -18,7 +18,7 @@ export const Comments = ({ movieId, comments, onAddComment, onDeleteComment }) =
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:5009/api/comments/${movieId}`, {
+      const response = await fetch(`/api/comments/${movieId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ export const Comments = ({ movieId, comments, onAddComment, onDeleteComment }) =
     }
     
     try {
-      const response = await fetch(`http://localhost:5009/api/comments/${movieId}/${commentId}`, {
+      const response = await fetch(`/api/comments/${movieId}/${commentId}`, {
         method: 'DELETE'
       });
       
