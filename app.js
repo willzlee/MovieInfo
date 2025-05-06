@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,14 @@ const PORT = process.env.PORT || 5000;
 
 // In-memory storage for comments
 const movieComments = new Map();
+
+// Configure session middleware
+app.use(session({
+  secret: 'movie-app-secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 3600000 } // 1 hour
+}));
 
 // Set up EJS as the view engine
 app.set('view engine', 'ejs');
@@ -20,9 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get('/', (req, res) => {
+  // Check if there are previous search results in session
+  const lastSearch = req.session.lastSearch || null;
+  
   res.render('index', { 
     title: 'Movie Information App',
-    movies: null,
+    movies: lastSearch ? lastSearch.results : null,
+    searchQuery: lastSearch ? lastSearch.query : '',
     error: null
   });
 });
@@ -39,24 +52,40 @@ app.get('/search', async (req, res) => {
     const response = await axios.get(`https://www.omdbapi.com/?s=${encodeURIComponent(searchQuery)}&apikey=${apiKey}`);
     
     if (response.data.Response === 'False') {
+      // Clear last search since this one failed
+      req.session.lastSearch = null;
+      
       return res.render('index', { 
         title: 'Movie Information App',
         movies: null,
+        searchQuery: searchQuery,
         error: response.data.Error || 'No results found'
       });
     }
 
+    // Store search results in session
+    req.session.lastSearch = {
+      query: searchQuery,
+      results: response.data.Search
+    };
+
     res.render('index', { 
       title: 'Movie Information App',
       movies: response.data.Search,
+      searchQuery: searchQuery,
       error: null
     });
 
   } catch (error) {
     console.error('Error fetching data from OMDB API:', error);
+    
+    // Clear last search on error
+    req.session.lastSearch = null;
+    
     res.render('index', { 
       title: 'Movie Information App',
       movies: null,
+      searchQuery: searchQuery,
       error: 'Error connecting to the movie database. Please try again later.'
     });
   }

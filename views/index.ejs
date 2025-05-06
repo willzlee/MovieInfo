@@ -16,7 +16,7 @@
         <section class="search-section">
             <form action="/search" method="GET">
                 <div class="search-container">
-                    <input type="text" name="search" placeholder="Search for a movie..." required>
+                    <input type="text" name="search" placeholder="Search for a movie..." value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>" required>
                     <button type="submit">Search</button>
                 </div>
             </form>
