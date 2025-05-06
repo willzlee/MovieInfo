@@ -35,5 +35,18 @@ module.exports = {
       filename: 'index.html'
     })
   ],
-  mode: 'development'
+  mode: 'development',
+  // Development server configuration
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'public'),
+    },
+    port: 5001, // Use a different port than the backend
+    hot: true,
+    historyApiFallback: true,
+    open: true,
+    devMiddleware: {
+      publicPath: '/dist/',
+    },
+  }
 };
