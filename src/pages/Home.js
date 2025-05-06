@@ -14,8 +14,8 @@ export const Home = ({ onMovieSelect, lastSearch, onSearchResults }) => {
     setError(null);
     
     try {
-      // The API endpoint is /api/search for our Express backend
-      const response = await fetch(`http://localhost:5009/api/search?query=${encodeURIComponent(searchQuery)}`);
+      // When using webpack-dev-server, the proxy will forward API requests
+      const response = await fetch(`/api/search?query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       
       if (data.error) {
