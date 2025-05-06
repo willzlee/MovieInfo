@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Movie Information App</h1>
+            <p>Search for movies, TV shows, and more</p>
+        </header>
+
+        <section class="search-section">
+            <form action="/search" method="GET">
+                <div class="search-container">
+                    <input type="text" name="search" placeholder="Search for a movie..." required>
+                    <button type="submit">Search</button>
+                </div>
+            </form>
+        </section>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <% if (movies && movies.length > 0) { %>
+            <section class="results-section">
+                <h2>Search Results</h2>
+                <div class="movie-grid">
+                    <% movies.forEach(movie => { %>
+                        <div class="movie-card">
+                            <a href="/movie/<%= movie.imdbID %>">
+                                <% if (movie.Poster && movie.Poster !== 'N/A') { %>
+                                    <img src="<%= movie.Poster %>" alt="<%= movie.Title %> poster">
+                                <% } else { %>
+                                    <div class="no-poster">No Poster Available</div>
+                                <% } %>
+                                <div class="movie-info">
+                                    <h3><%= movie.Title %></h3>
+                                    <p><%= movie.Year %></p>
+                                    <span class="movie-type"><%= movie.Type %></span>
+                                </div>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+            </section>
+        <% } %>
+    </div>
+    <footer>
+        <p>Data provided by <a href="https://www.omdbapi.com/" target="_blank">OMDb API</a></p>
+    </footer>
+</body>
+</html>

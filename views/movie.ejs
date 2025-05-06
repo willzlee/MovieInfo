@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Movie Information App</h1>
+            <nav>
+                <a href="/" class="back-button">Back to Search</a>
+            </nav>
+        </header>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <p><%= error %></p>
+            </div>
+        <% } %>
+
+        <% if (movie) { %>
+            <section class="movie-details">
+                <div class="movie-header">
+                    <h2><%= movie.Title %> <span class="year">(<%= movie.Year %>)</span></h2>
+                    <div class="movie-meta">
+                        <span><%= movie.Rated %></span>
+                        <span><%= movie.Runtime %></span>
+                        <span><%= movie.Genre %></span>
+                        <span>Released: <%= movie.Released %></span>
+                    </div>
+                </div>
+
+                <div class="movie-content">
+                    <div class="movie-poster">
+                        <% if (movie.Poster && movie.Poster !== 'N/A') { %>
+                            <img src="<%= movie.Poster %>" alt="<%= movie.Title %> poster">
+                        <% } else { %>
+                            <div class="no-poster">No Poster Available</div>
+                        <% } %>
+                        
+                        <div class="ratings">
+                            <h3>Ratings</h3>
+                            <% if (movie.Ratings && movie.Ratings.length > 0) { %>
+                                <ul>
+                                    <% movie.Ratings.forEach(rating => { %>
+                                        <li>
+                                            <span class="rating-source"><%= rating.Source %>:</span>
+                                            <span class="rating-value"><%= rating.Value %></span>
+                                        </li>
+                                    <% }); %>
+                                </ul>
+                            <% } else { %>
+                                <p>No ratings available</p>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <div class="movie-info-detailed">
+                        <div class="plot">
+                            <h3>Plot</h3>
+                            <p><%= movie.Plot %></p>
+                        </div>
+                        
+                        <div class="movie-credits">
+                            <div class="credit-item">
+                                <h3>Director</h3>
+                                <p><%= movie.Director %></p>
+                            </div>
+                            
+                            <div class="credit-item">
+                                <h3>Writers</h3>
+                                <p><%= movie.Writer %></p>
+                            </div>
+                            
+                            <div class="credit-item">
+                                <h3>Actors</h3>
+                                <p><%= movie.Actors %></p>
+                            </div>
+                        </div>
+                        
+                        <div class="additional-info">
+                            <% if (movie.Awards && movie.Awards !== 'N/A') { %>
+                                <div class="info-item">
+                                    <h3>Awards</h3>
+                                    <p><%= movie.Awards %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.BoxOffice && movie.BoxOffice !== 'N/A') { %>
+                                <div class="info-item">
+                                    <h3>Box Office</h3>
+                                    <p><%= movie.BoxOffice %></p>
+                                </div>
+                            <% } %>
+                            
+                            <% if (movie.Production && movie.Production !== 'N/A') { %>
+                                <div class="info-item">
+                                    <h3>Production</h3>
+                                    <p><%= movie.Production %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="external-links">
+                    <p>IMDb ID: <%= movie.imdbID %></p>
+                    <a href="https://www.imdb.com/title/<%= movie.imdbID %>" target="_blank" class="imdb-link">View on IMDb</a>
+                </div>
+            </section>
+        <% } %>
+    </div>
+    
+    <footer>
+        <p>Data provided by <a href="https://www.omdbapi.com/" target="_blank">OMDb API</a></p>
+    </footer>
+</body>
+</html>
